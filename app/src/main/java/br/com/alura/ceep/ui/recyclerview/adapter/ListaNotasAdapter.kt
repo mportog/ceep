@@ -8,10 +8,15 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.databinding.BindingAdapter
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import br.com.alura.ceep.BR
 import br.com.alura.ceep.R
+import br.com.alura.ceep.databinding.ItemNotaBinding
 import br.com.alura.ceep.model.Nota
 import br.com.alura.ceep.ui.extensions.carregaImagem
 import kotlinx.android.synthetic.main.item_nota.view.*
@@ -22,8 +27,11 @@ class ListaNotasAdapter(
 ) : ListAdapter<Nota, ListaNotasAdapter.ViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val viewCriada = LayoutInflater.from(context).inflate(R.layout.item_nota, parent, false)
-        return ViewHolder(viewCriada)
+        val inflater = LayoutInflater.from(context)
+        val viewBindingUtil =
+            ItemNotaBinding.inflate(inflater, parent, false)
+
+        return ViewHolder(viewBindingUtil)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -32,45 +40,22 @@ class ListaNotasAdapter(
         }
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
+    inner class ViewHolder(private val viewDataBinding: ItemNotaBinding) :
+        RecyclerView.ViewHolder(viewDataBinding.root), View.OnClickListener {
         private lateinit var nota: Nota
-        private val campoTitulo: TextView by lazy {
-            itemView.item_nota_titulo
-        }
-        private val campoDescricao: TextView by lazy {
-            itemView.item_nota_descricao
-        }
-        private val campoFavorita: ImageView by lazy {
-            itemView.item_nota_favorita
-        }
-        private val campoImagem: ImageView by lazy {
-            itemView.item_nota_imagem
-        }
 
-        init {
-            itemView.setOnClickListener {
-                if (::nota.isInitialized) {
-                    onItemClickListener(nota)
-                }
+        override fun onClick(view: View?) {
+            if (::nota.isInitialized) {
+                onItemClickListener(nota)
             }
         }
+init {
+    viewDataBinding.clicaNaNota = this
 
+}
         fun vincula(nota: Nota) {
             this.nota = nota
-            campoTitulo.text = nota.titulo
-            campoDescricao.text = nota.descricao
-            if (this.nota.favorita) {
-                campoFavorita.visibility = VISIBLE
-            } else {
-                campoFavorita.visibility = GONE
-            }
-            campoImagem.carregaImagem(nota.imagemUrl)
-            if (nota.imagemUrl.isEmpty()) {
-                campoImagem.visibility = GONE
-            } else {
-                campoImagem.visibility = VISIBLE
-            }
+            viewDataBinding.nota = nota
         }
 
     }
